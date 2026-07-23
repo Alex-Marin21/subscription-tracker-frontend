@@ -175,6 +175,24 @@ export default function App() {
   };
 
   /**
+   * Calls the backend to create a Stripe Checkout Session and redirects the user.
+   */
+  const handlePayment = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/payment/create-checkout-session`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error('Payment failed', err);
+    }
+  };
+
+  /**
    * Fetches administrative data including stats and user lists.
    */
   const fetchAdminData = async () => {
@@ -266,7 +284,7 @@ export default function App() {
               <span className="text-3xl font-bold text-emerald-400">€10</span>
             </div>
             <button 
-              onClick={() => alert('Urmeaza implementarea Stripe. Aici se va deschide pagina de plata!')} 
+              onClick={handlePayment} 
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition flex justify-center items-center gap-2 shadow-lg shadow-indigo-600/20"
             >
               Pay with Card
