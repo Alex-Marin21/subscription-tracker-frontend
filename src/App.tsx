@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Plus, Trash2, LogOut, Lock, Mail } from 'lucide-react';
+import { CreditCard, Plus, Trash2, LogOut, Lock, Mail, Calendar, Tag, DollarSign, RefreshCw } from 'lucide-react';
 
 interface Subscription {
   id?: number;
@@ -17,19 +17,17 @@ export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [email, setEmail] = useState<string>(localStorage.getItem('userEmail') || '');
   
-  // Auth Form State
   const [isRegister, setIsRegister] = useState(false);
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authError, setAuthError] = useState('');
 
-  // Subscriptions State
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Subscription>({
     name: '',
     price: 0,
-    currency: 'USD',
+    currency: 'RON',
     billingCycle: 'MONTHLY',
     nextRenewalDate: '',
     category: 'Streaming'
@@ -106,7 +104,7 @@ export default function App() {
       });
       if (res.ok) {
         fetchSubscriptions();
-        setFormData({ name: '', price: 0, currency: 'USD', billingCycle: 'MONTHLY', nextRenewalDate: '', category: 'Streaming' });
+        setFormData({ name: '', price: 0, currency: 'RON', billingCycle: 'MONTHLY', nextRenewalDate: '', category: 'Streaming' });
       }
     } catch (err) {
       console.error(err);
@@ -194,56 +192,122 @@ export default function App() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-400">{email}</span>
-            <button onClick={handleLogout} className="flex items-center gap-1 bg-slate-700 hover:bg-slate-600 text-sm px-3 py-1.5 rounded-lg">
+            <button onClick={handleLogout} className="flex items-center gap-1 bg-slate-700 hover:bg-slate-600 text-sm px-3 py-1.5 rounded-lg transition">
               <LogOut className="w-4 h-4" /> Logout
             </button>
           </div>
         </header>
 
         <form onSubmit={handleSubmit} className="bg-slate-800 p-6 rounded-xl border border-slate-700 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            type="text"
-            placeholder="Name (e.g. Netflix)"
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="bg-slate-900 border border-slate-700 p-2 rounded-lg"
-          />
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Price"
-            required
-            value={formData.price || ''}
-            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-            className="bg-slate-900 border border-slate-700 p-2 rounded-lg"
-          />
-          <input
-            type="date"
-            required
-            value={formData.nextRenewalDate}
-            onChange={(e) => setFormData({ ...formData, nextRenewalDate: e.target.value })}
-            className="bg-slate-900 border border-slate-700 p-2 rounded-lg"
-          />
-          <button type="submit" className="md:col-span-3 bg-indigo-600 hover:bg-indigo-700 p-2 rounded-lg font-medium flex items-center justify-center gap-2">
-            <Plus className="w-5 h-5" /> Add Subscription
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Nume Serviciu</label>
+            <input
+              type="text"
+              placeholder="e.g. Netflix, Steam, Spotify"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Preț</label>
+            <input
+              type="number"
+              step="0.01"
+              placeholder="0.00"
+              required
+              value={formData.price || ''}
+              onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+              className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Valută</label>
+            <select
+              value={formData.currency}
+              onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+              className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            >
+              <option value="RON">RON</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="USD">USD ($)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Frecvență Plată</label>
+            <select
+              value={formData.billingCycle}
+              onChange={(e) => setFormData({ ...formData, billingCycle: e.target.value })}
+              className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            >
+              <option value="MONTHLY">Lunar (Per Month)</option>
+              <option value="YEARLY">Anual (Per Year)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Categorie</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            >
+              <option value="Streaming">Streaming (Movie / Music)</option>
+              <option value="Gaming">Gaming (Steam, Xbox, PSN)</option>
+              <option value="Work / Productivity">Work / Productivity (Cloud, AI)</option>
+              <option value="Utilities / Software">Utilities / Software</option>
+              <option value="Other">Altele</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Data Reînnoirii</label>
+            <input
+              type="date"
+              required
+              value={formData.nextRenewalDate}
+              onChange={(e) => setFormData({ ...formData, nextRenewalDate: e.target.value })}
+              className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <button type="submit" className="md:col-span-3 bg-indigo-600 hover:bg-indigo-700 p-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition">
+            <Plus className="w-5 h-5" /> Adaugă Abonament
           </button>
         </form>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Your Subscriptions</h2>
+          <h2 className="text-lg font-semibold">Abonamentele Tale</h2>
           {loading ? (
-            <p>Loading...</p>
+            <p className="text-slate-400">Loading...</p>
           ) : subscriptions.length === 0 ? (
-            <p className="text-slate-400">No subscriptions added yet.</p>
+            <p className="text-slate-400 bg-slate-800/50 p-6 rounded-xl border border-slate-800 text-center">Nu ai adăugat niciun abonament încă.</p>
           ) : (
             subscriptions.map((sub) => (
-              <div key={sub.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                <div>
-                  <h3 className="font-bold text-lg">{sub.name}</h3>
-                  <p className="text-sm text-slate-400">{sub.price} {sub.currency} • Renews on {sub.nextRenewalDate}</p>
+              <div key={sub.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center hover:border-slate-600 transition">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-lg text-white">{sub.name}</h3>
+                    <span className="text-xs bg-indigo-950 text-indigo-300 border border-indigo-800/60 px-2.5 py-0.5 rounded-full font-medium">
+                      {sub.category || 'Streaming'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-slate-400">
+                    <span className="font-semibold text-emerald-400">
+                      {sub.price} {sub.currency} {sub.billingCycle === 'YEARLY' ? '/ an' : '/ lună'}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                      Data reînnoirii: {sub.nextRenewalDate}
+                    </span>
+                  </div>
                 </div>
-                <button onClick={() => handleDelete(sub.id)} className="text-red-400 hover:text-red-300 p-2">
+                <button onClick={() => handleDelete(sub.id)} className="text-slate-500 hover:text-red-400 p-2 transition">
                   <Trash2 className="w-5 h-5" />
                 </button>
               </div>
