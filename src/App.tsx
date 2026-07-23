@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Plus, Trash2, LogOut, Lock, Mail, Calendar, DollarSign, Layers, Clock, ShieldCheck, Users, KeyRound, ArrowLeft } from 'lucide-react';
+import { CreditCard, Plus, Trash2, LogOut, Lock, Mail, Calendar, DollarSign, Layers, Clock, ShieldCheck, Users } from 'lucide-react';
 
 interface Subscription {
   id?: number;
@@ -21,7 +21,7 @@ interface AdminUser {
 
 const API_BASE = 'https://subscription-tracker-backend-jd5g.onrender.com/api';
 
-type ViewState = 'auth' | 'otp' | 'forgot' | 'reset' | 'dashboard' | 'admin';
+type ViewState = 'auth' | 'dashboard' | 'admin';
 
 export default function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
@@ -34,8 +34,6 @@ export default function App() {
   // Auth Form State
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [authMessage, setAuthMessage] = useState({ text: '', type: '' });
 
   // Dashboard State
@@ -87,34 +85,7 @@ export default function App() {
         throw new Error(data || typeof data === 'string' ? data : 'Authentication failed');
       }
 
-      if (isRegister) {
-        showMessage('Verification code sent to your email!', 'success');
-        setView('otp');
-      } else {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userEmail', data.email);
-        localStorage.setItem('userRole', data.role);
-        setToken(data.token);
-        setEmail(data.email);
-        setRole(data.role);
-        setView('dashboard');
-      }
-    } catch (err: any) {
-      showMessage(err.message, 'error');
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${API_BASE}/auth/verify-account`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: authEmail, code: otpCode })
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data || 'Invalid code');
-
+      // Auto-login applies for both login and MVP register
       localStorage.setItem('token', data.token);
       localStorage.setItem('userEmail', data.email);
       localStorage.setItem('userRole', data.role);
@@ -122,42 +93,7 @@ export default function App() {
       setEmail(data.email);
       setRole(data.role);
       setView('dashboard');
-    } catch (err: any) {
-      showMessage(err.message, 'error');
-    }
-  };
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await fetch(`${API_BASE}/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: authEmail })
-      });
-      showMessage('If the email exists, a reset code was sent.', 'success');
-      setView('reset');
-    } catch (err: any) {
-      showMessage('Something went wrong.', 'error');
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${API_BASE}/auth/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: authEmail, code: otpCode, newPassword })
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data || 'Invalid code or password');
-
-      showMessage('Password reset successfully. You can now login.', 'success');
-      setView('auth');
-      setIsRegister(false);
-      setOtpCode('');
-      setNewPassword('');
+      
     } catch (err: any) {
       showMessage(err.message, 'error');
     }
@@ -241,97 +177,30 @@ export default function App() {
             </div>
           )}
 
-          {view === 'auth' && (
-            <>
-              <h2 className="text-xl font-semibold mb-4 text-center">{isRegister ? 'Create an Account' : 'Welcome Back'}</h2>
-              <form onSubmit={handleAuth} className="space-y-4">
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Email</label>
-                  <div className="relative">
-                    <Mail className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
-                    <input type="email" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="you@example.com" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Password</label>
-                  <div className="relative">
-                    <Lock className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
-                    <input type="password" required value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="••••••••" />
-                  </div>
-                  {isRegister && <p className="text-xs text-slate-500 mt-1">Must be 8+ chars, with 1 uppercase, 1 lowercase, and 1 number.</p>}
-                </div>
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition">{isRegister ? 'Sign Up' : 'Log In'}</button>
-              </form>
-              <div className="mt-4 flex flex-col gap-2 text-center">
-                <button onClick={() => { setIsRegister(!isRegister); setAuthMessage({text:'', type:''}); }} className="text-sm text-indigo-400 hover:underline">
-                  {isRegister ? 'Already have an account? Log In' : "Don't have an account? Sign Up"}
-                </button>
-                {!isRegister && (
-                  <button onClick={() => { setView('forgot'); setAuthMessage({text:'', type:''}); }} className="text-sm text-slate-400 hover:text-white transition">
-                    Forgot Password?
-                  </button>
-                )}
+          <h2 className="text-xl font-semibold mb-4 text-center">{isRegister ? 'Create an Account' : 'Welcome Back'}</h2>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div>
+              <label className="block text-sm text-slate-400 mb-1">Email</label>
+              <div className="relative">
+                <Mail className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
+                <input type="email" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="you@example.com" />
               </div>
-            </>
-          )}
-
-          {view === 'otp' && (
-            <>
-              <h2 className="text-xl font-semibold mb-4 text-center">Verify Your Email</h2>
-              <p className="text-sm text-slate-400 text-center mb-4">We sent a 6-digit code to <strong>{authEmail}</strong></p>
-              <form onSubmit={handleVerifyOtp} className="space-y-4">
-                <div>
-                  <div className="relative">
-                    <KeyRound className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
-                    <input type="text" required value={otpCode} onChange={(e) => setOtpCode(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-indigo-500 text-center tracking-widest" placeholder="000000" maxLength={6} />
-                  </div>
-                </div>
-                <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition">Verify Account</button>
-              </form>
-            </>
-          )}
-
-          {view === 'forgot' && (
-            <>
-              <button onClick={() => setView('auth')} className="text-slate-400 hover:text-white mb-4 flex items-center gap-1 text-sm"><ArrowLeft className="w-4 h-4"/> Back to Login</button>
-              <h2 className="text-xl font-semibold mb-4 text-center">Reset Password</h2>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">Enter your Email</label>
-                  <div className="relative">
-                    <Mail className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
-                    <input type="email" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="you@example.com" />
-                  </div>
-                </div>
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition">Send Reset Code</button>
-              </form>
-            </>
-          )}
-
-          {view === 'reset' && (
-            <>
-              <h2 className="text-xl font-semibold mb-4 text-center">Enter Reset Details</h2>
-              <form onSubmit={handleResetPassword} className="space-y-4">
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">6-Digit Code</label>
-                  <div className="relative">
-                    <KeyRound className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
-                    <input type="text" required value={otpCode} onChange={(e) => setOtpCode(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-indigo-500 tracking-widest" placeholder="000000" maxLength={6} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-slate-400 mb-1">New Password</label>
-                  <div className="relative">
-                    <Lock className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
-                    <input type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="••••••••" />
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">Must be 8+ chars, with 1 uppercase, 1 lowercase, and 1 number.</p>
-                </div>
-                <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition">Save New Password</button>
-              </form>
-            </>
-          )}
-
+            </div>
+            <div>
+              <label className="block text-sm text-slate-400 mb-1">Password</label>
+              <div className="relative">
+                <Lock className="w-5 h-5 absolute left-3 top-2.5 text-slate-500" />
+                <input type="password" required value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="••••••••" />
+              </div>
+              {isRegister && <p className="text-xs text-slate-500 mt-1">Must be 8+ chars, with 1 uppercase, 1 lowercase, and 1 number.</p>}
+            </div>
+            <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition">{isRegister ? 'Sign Up' : 'Log In'}</button>
+          </form>
+          <div className="mt-4 flex flex-col gap-2 text-center">
+            <button onClick={() => { setIsRegister(!isRegister); setAuthMessage({text:'', type:''}); }} className="text-sm text-indigo-400 hover:underline">
+              {isRegister ? 'Already have an account? Log In' : "Don't have an account? Sign Up"}
+            </button>
+          </div>
         </div>
       </div>
     );
