@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Plus, Trash2, LogOut, Lock, Mail, Calendar } from 'lucide-react';
+import { CreditCard, Plus, Trash2, LogOut, Lock, Mail, Calendar, DollarSign, Layers, Clock } from 'lucide-react';
 
 interface Subscription {
   id?: number;
@@ -124,6 +124,16 @@ export default function App() {
     }
   };
 
+  // Summary Calculations
+  const totalMonthlySpend = subscriptions.reduce((acc, sub) => {
+    const monthlyPrice = sub.billingCycle === 'YEARLY' ? sub.price / 12 : sub.price;
+    return acc + monthlyPrice;
+  }, 0);
+
+  const upcomingRenewal = subscriptions.length > 0 
+    ? [...subscriptions].sort((a, b) => new Date(a.nextRenewalDate).getTime() - new Date(b.nextRenewalDate).getTime())[0]
+    : null;
+
   if (!token) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
@@ -198,6 +208,42 @@ export default function App() {
           </div>
         </header>
 
+        {/* Top Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-slate-400 font-medium">Estimated Monthly Spend</p>
+              <p className="text-2xl font-bold text-emerald-400 mt-1">{totalMonthlySpend.toFixed(2)}</p>
+            </div>
+            <div className="bg-emerald-950/60 p-3 rounded-lg border border-emerald-800/50">
+              <DollarSign className="w-6 h-6 text-emerald-400" />
+            </div>
+          </div>
+
+          <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-slate-400 font-medium">Active Subscriptions</p>
+              <p className="text-2xl font-bold text-indigo-400 mt-1">{subscriptions.length}</p>
+            </div>
+            <div className="bg-indigo-950/60 p-3 rounded-lg border border-indigo-800/50">
+              <Layers className="w-6 h-6 text-indigo-400" />
+            </div>
+          </div>
+
+          <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-slate-400 font-medium">Next Renewal</p>
+              <p className="text-sm font-semibold text-slate-200 mt-1">
+                {upcomingRenewal ? `${upcomingRenewal.name} (${upcomingRenewal.nextRenewalDate})` : 'None'}
+              </p>
+            </div>
+            <div className="bg-amber-950/60 p-3 rounded-lg border border-amber-800/50">
+              <Clock className="w-6 h-6 text-amber-400" />
+            </div>
+          </div>
+        </div>
+
+        {/* Form Section */}
         <form onSubmit={handleSubmit} className="bg-slate-800 p-6 rounded-xl border border-slate-700 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs text-slate-400 mb-1">Service Name</label>
@@ -280,6 +326,7 @@ export default function App() {
           </button>
         </form>
 
+        {/* List Section */}
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Your Subscriptions</h2>
           {loading ? (
