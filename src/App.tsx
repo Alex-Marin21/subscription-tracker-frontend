@@ -27,7 +27,7 @@ export default function App() {
   const [formData, setFormData] = useState<Subscription>({
     name: '',
     price: 0,
-    currency: 'RON',
+    currency: 'USD',
     billingCycle: 'MONTHLY',
     nextRenewalDate: '',
     category: 'Streaming'
@@ -104,7 +104,7 @@ export default function App() {
       });
       if (res.ok) {
         fetchSubscriptions();
-        setFormData({ name: '', price: 0, currency: 'RON', billingCycle: 'MONTHLY', nextRenewalDate: '', category: 'Streaming' });
+        setFormData({ name: '', price: 0, currency: 'USD', billingCycle: 'MONTHLY', nextRenewalDate: '', category: 'Streaming' });
       }
     } catch (err) {
       console.error(err);
@@ -200,7 +200,7 @@ export default function App() {
 
         <form onSubmit={handleSubmit} className="bg-slate-800 p-6 rounded-xl border border-slate-700 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Nume Serviciu</label>
+            <label className="block text-xs text-slate-400 mb-1">Service Name</label>
             <input
               type="text"
               placeholder="e.g. Netflix, Steam, Spotify"
@@ -212,7 +212,7 @@ export default function App() {
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Preț</label>
+            <label className="block text-xs text-slate-400 mb-1">Price</label>
             <input
               type="number"
               step="0.01"
@@ -225,47 +225,47 @@ export default function App() {
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Valută</label>
+            <label className="block text-xs text-slate-400 mb-1">Currency</label>
             <select
               value={formData.currency}
               onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
               className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
             >
-              <option value="RON">RON</option>
-              <option value="EUR">EUR (€)</option>
               <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="RON">RON</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Frecvență Plată</label>
+            <label className="block text-xs text-slate-400 mb-1">Billing Cycle</label>
             <select
               value={formData.billingCycle}
               onChange={(e) => setFormData({ ...formData, billingCycle: e.target.value })}
               className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
             >
-              <option value="MONTHLY">Lunar (Per Month)</option>
-              <option value="YEARLY">Anual (Per Year)</option>
+              <option value="MONTHLY">Monthly</option>
+              <option value="YEARLY">Yearly</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Categorie</label>
+            <label className="block text-xs text-slate-400 mb-1">Category</label>
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-sm text-white focus:outline-none focus:border-indigo-500"
             >
-              <option value="Streaming">Streaming (Movie / Music)</option>
-              <option value="Gaming">Gaming (Steam, Xbox, PSN)</option>
-              <option value="Work / Productivity">Work / Productivity (Cloud, AI)</option>
+              <option value="Streaming">Streaming</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Work / Productivity">Work / Productivity</option>
               <option value="Utilities / Software">Utilities / Software</option>
-              <option value="Other">Altele</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Data Reînnoirii</label>
+            <label className="block text-xs text-slate-400 mb-1">Renewal Date</label>
             <input
               type="date"
               required
@@ -276,16 +276,16 @@ export default function App() {
           </div>
 
           <button type="submit" className="md:col-span-3 bg-indigo-600 hover:bg-indigo-700 p-2.5 rounded-lg font-medium flex items-center justify-center gap-2 transition">
-            <Plus className="w-5 h-5" /> Adaugă Abonament
+            <Plus className="w-5 h-5" /> Add Subscription
           </button>
         </form>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Abonamentele Tale</h2>
+          <h2 className="text-lg font-semibold">Your Subscriptions</h2>
           {loading ? (
             <p className="text-slate-400">Loading...</p>
           ) : subscriptions.length === 0 ? (
-            <p className="text-slate-400 bg-slate-800/50 p-6 rounded-xl border border-slate-800 text-center">Nu ai adăugat niciun abonament încă.</p>
+            <p className="text-slate-400 bg-slate-800/50 p-6 rounded-xl border border-slate-800 text-center">No subscriptions added yet.</p>
           ) : (
             subscriptions.map((sub) => (
               <div key={sub.id} className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center hover:border-slate-600 transition">
@@ -298,12 +298,12 @@ export default function App() {
                   </div>
                   <div className="flex items-center gap-4 text-sm text-slate-400">
                     <span className="font-semibold text-emerald-400">
-                      {sub.price} {sub.currency} {sub.billingCycle === 'YEARLY' ? '/ an' : '/ lună'}
+                      {sub.price} {sub.currency} {sub.billingCycle === 'YEARLY' ? '/ yr' : '/ mo'}
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                      Data reînnoirii: {sub.nextRenewalDate}
+                      Renews on: {sub.nextRenewalDate}
                     </span>
                   </div>
                 </div>
