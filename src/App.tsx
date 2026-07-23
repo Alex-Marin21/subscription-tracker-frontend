@@ -42,6 +42,15 @@ export default function App() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
+
+    if (isRegister) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+      if (!passwordRegex.test(authPassword)) {
+        setAuthError('Password must be at least 8 characters long, with an uppercase, a lowercase, and a number.');
+        return;
+      }
+    }
+
     const endpoint = isRegister ? '/auth/register' : '/auth/login';
 
     try {
@@ -124,7 +133,6 @@ export default function App() {
     }
   };
 
-  // Summary Calculations
   const totalMonthlySpend = subscriptions.reduce((acc, sub) => {
     const monthlyPrice = sub.billingCycle === 'YEARLY' ? sub.price / 12 : sub.price;
     return acc + monthlyPrice;
@@ -145,7 +153,7 @@ export default function App() {
           <h2 className="text-xl font-semibold mb-4 text-center">
             {isRegister ? 'Create an Account' : 'Welcome Back'}
           </h2>
-          {authError && <p className="text-red-400 text-sm mb-4 text-center bg-red-950/50 p-2 rounded">{authError}</p>}
+          {authError && <p className="text-red-400 text-sm mb-4 text-center bg-red-950/50 p-2 rounded border border-red-800/50">{authError}</p>}
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
               <label className="block text-sm text-slate-400 mb-1">Email</label>
@@ -174,6 +182,11 @@ export default function App() {
                   placeholder="••••••••"
                 />
               </div>
+              {isRegister && (
+                <p className="text-xs text-slate-500 mt-1">
+                  Must be 8+ chars, with 1 uppercase, 1 lowercase, and 1 number.
+                </p>
+              )}
             </div>
             <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition">
               {isRegister ? 'Sign Up' : 'Log In'}
@@ -208,7 +221,6 @@ export default function App() {
           </div>
         </header>
 
-        {/* Top Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
             <div>
@@ -243,7 +255,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Form Section */}
         <form onSubmit={handleSubmit} className="bg-slate-800 p-6 rounded-xl border border-slate-700 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs text-slate-400 mb-1">Service Name</label>
@@ -326,7 +337,6 @@ export default function App() {
           </button>
         </form>
 
-        {/* List Section */}
         <div className="space-y-3">
           <h2 className="text-lg font-semibold">Your Subscriptions</h2>
           {loading ? (
