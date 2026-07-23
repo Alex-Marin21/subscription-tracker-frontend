@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Plus, Trash2, LogOut, Lock, Mail, Calendar, Tag, DollarSign, RefreshCw } from 'lucide-react';
+import { CreditCard, Plus, Trash2, LogOut, Lock, Mail, Calendar } from 'lucide-react';
 
 interface Subscription {
   id?: number;
